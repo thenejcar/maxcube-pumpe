@@ -20,10 +20,10 @@ class Logger:
         print(len(self.cube.devices), "devices found")
         for device in self.cube.devices:
             id = device.name.split("_")[0]
-            if apartments[id] is None:
+            if id not in apartments:
                 apartments[id] = []
             apartments[id].append(device)
             with open("log.csv", "a") as file:
-                file.write(",".join([now, id, device.name, device.valve_position, device.actual_temperature]))
+                row = ",".join([now, id, device.name, str(device.valve_position), str(device.actual_temperature)]) + "\n"
+                file.write(row)
                 file.close()
-

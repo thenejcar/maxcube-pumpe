@@ -11,11 +11,6 @@ def plot_and_reset():
     logs = {}
 
     colors = {}
-    colormap = {
-        "8": "r",
-        "10": "g",
-        "11": "b"
-    }
 
     # read the data
     with open('log.csv', 'r') as file:
@@ -43,7 +38,7 @@ def plot_and_reset():
                 names.add(thermostat)
 
             if thermostat not in colors:
-                colors[thermostat] = colormap[apartment]
+                colors[thermostat] = randomised_color()
 
         file.close()
 
@@ -52,31 +47,43 @@ def plot_and_reset():
     # todo: clear the log
 
     # write valve chart
-    fig = plt.figure(figsize=(10, 5))
-    ax = fig.add_subplot(111)
-    ax.set_label("Valves from " + timestamps[0] + " to " + timestamps[-1])
-    ax.set_ylabel('Valve position')
-    ax.grid(which='major', linestyle='-')
-    ax.grid(which='minor', linestyle=':')
+    plt.title("Valves from " + timestamps[0] + " to " + timestamps[-1])
 
-    legend = []
+    for id in names.keys():
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.set_ylabel('Valve position')
+        ax.grid(which='major', linestyle='-')
+        ax.grid(which='minor', linestyle=':')
 
-    for name in names:
-        color = colors[name]
+        legend = []
 
-        y = [logs[t][name]["valve"] for t in timestamps]
-        ax.plot(timestamps, y, '-', color=color)
-        legend.append(mpatches.Patch(color=color, label=name))
+        for name in names[id]:
+            color = colors[name]
 
-    plt.legend(handles=legend)
+            x = []
+            y = []
+            for t in timestamps:
+                if name in logs[t]:
+                    x.append(t)
+                    y.append(float(logs[t][name]["valve"]))
+                # if name is not in the dict, skip this datapoint
+
+            ax.plot(x, y, '-', color=color)
+            legend.append(mpatches.Patch(color=color, label=name))
+
+        fig.legend(handles=legend)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
     plt.draw()
-    fig.savefig('valves.pdf')
+    plt.savefig('valves.pdf')
 
 
-def randomised_color(color):
+def randomised_color(color=None):
     base = 0.1
 
-    rd = (lambda: random.uniform(0.2, 0.95))
+    def rd():
+        return random.uniform(0.2, 1.0)
 
     if color == "r":
         return (rd(), base, base)
