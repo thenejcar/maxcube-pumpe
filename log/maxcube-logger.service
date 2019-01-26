@@ -1,0 +1,10 @@
+[Unit]
+Description=Log the maxcube stats to a csv file
+
+[Service]
+Type=simple
+User=pi
+ExecStart=/opt/maxcube-pumpe/logger.bash
+
+[Install]
+WantedBy=multi-user.target

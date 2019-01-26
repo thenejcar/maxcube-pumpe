@@ -1,0 +1,9 @@
+[Unit]
+Description=Run maxcube-plotter service every day, 5 min before midnight
+
+[Timer]
+OnCalendar=*-*-* 23:55:00
+Unit=maxcube-plotter.service
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=Run maxcube-logger service every 10 minutes
+
+[Timer]
+OnCalendar=*:0/10
+Unit=maxcube-logger.service
+
+[Install]
+WantedBy=multi-user.target

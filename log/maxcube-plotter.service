@@ -1,0 +1,10 @@
+[Unit]
+Description=Convert maxcube-logger's log into a pdf and scp it to a remote server
+
+[Service]
+Type=simple
+User=pi
+ExecStart=/opt/maxcube-pumpe/plotter.bash
+
+[Install]
+WantedBy=multi-user.target

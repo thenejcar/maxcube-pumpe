@@ -57,14 +57,14 @@ class Controller:
         print(len(self.cube.devices), "devices found")
         for device in self.cube.devices:
             id = device.name.split("_")[0]
-            if apartments[id] is None:
+            if id not in apartments:
                 apartments[id] = []
             apartments[id].append(device)
 
         for id in apartments.keys():
             all_off = True
-            for x in apartments[id]:
-                all_off &= x["valve_position"] == 0
+            for device in apartments[id]:
+                all_off &= device.valve_position == 0
 
             if all_off:
                 if self.pin_status[self.pin_mapping[id]] == 0:
@@ -77,11 +77,11 @@ class Controller:
 
             self.update_pins()
 
-    def run_forever(self):
+    def run_forever(self, interval=5):
         while True:
             try:
                 self.scan_and_update_pins()
-                sleep(5 * 60)
+                sleep(interval * 60)
             except Exception:
                 print("Background sleep was terminated, exiting the loop")
                 break
