@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 from matplotlib import patches as mpatches
+from matplotlib.backends.backend_pdf import PdfPages
 
 import csv
 import time
@@ -7,7 +8,7 @@ import random
 
 
 def plot_and_reset():
-    names = set()
+    names = {}
     logs = {}
 
     colors = {}
@@ -34,8 +35,11 @@ def plot_and_reset():
                 "temp": temp
             }
 
-            if thermostat not in names:
-                names.add(thermostat)
+            if apartment not in names:
+                names[apartment] = set()
+
+            if thermostat not in names[apartment]:
+                names[apartment].add(thermostat)
 
             if thermostat not in colors:
                 colors[thermostat] = randomised_color()
@@ -47,55 +51,55 @@ def plot_and_reset():
     # todo: clear the log
 
     # write valve chart
-    plt.title("Valves from " + timestamps[0] + " to " + timestamps[-1])
+    with PdfPages('valves.pdf') as pdf:
+        for id in names.keys():
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            plt.title("Valves from " + timestamps[0] + " to " + timestamps[-1])
+            ax.set_ylabel('Valve position')
+            ax.grid(which='major', linestyle='-')
+            ax.grid(which='minor', linestyle=':')
 
-    for id in names.keys():
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.set_ylabel('Valve position')
-        ax.grid(which='major', linestyle='-')
-        ax.grid(which='minor', linestyle=':')
+            legend = []
 
-        legend = []
+            for name in names[id]:
+                color = colors[name]
 
-        for name in names[id]:
-            color = colors[name]
+                x = []
+                y = []
+                for t in timestamps:
+                    if name in logs[t]:
+                        x.append(t)
+                        y.append(float(logs[t][name]["valve"]))
+                    # if name is not in the dict, skip this datapoint
 
-            x = []
-            y = []
-            for t in timestamps:
-                if name in logs[t]:
-                    x.append(t)
-                    y.append(float(logs[t][name]["valve"]))
-                # if name is not in the dict, skip this datapoint
+                ax.plot(x, y, '-', color=color)
+                legend.append(mpatches.Patch(color=color, label=name))
 
-            ax.plot(x, y, '-', color=color)
-            legend.append(mpatches.Patch(color=color, label=name))
-
-        fig.legend(handles=legend)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.draw()
-    plt.savefig('valves.pdf')
+            fig.legend(handles=legend)
+            plt.xticks(rotation=90)
+            plt.tight_layout()
+            plt.draw()
+            pdf.savefig(fig)
 
 
 def randomised_color(color=None):
     base = 0.1
 
     def rd():
-        return random.uniform(0.2, 1.0)
+        return random.uniform(0.2, 0.9)
 
     if color == "r":
-        return (rd(), base, base)
+        return (rd(), base, base, 0.8)
     elif color == "g":
-        return (base, rd(), base)
+        return (base, rd(), base, 0.8)
     elif color == "b":
-        return (base, base, rd())
+        return (base, base, rd(), 0.8)
     elif color == "c":
-        return (base, rd(), rd())
+        return (base, rd(), rd(), 0.8)
     elif color == "y":
-        return (rd(), rd(), base)
+        return (rd(), rd(), base, 0.8)
     elif color == "m":
-        return (rd(), base, rd())
+        return (rd(), base, rd(), 0.8)
     else:
-        return (rd(), rd(), rd())
+        return (rd(), rd(), rd(), 0.8)
