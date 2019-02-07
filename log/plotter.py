@@ -1,9 +1,9 @@
 from matplotlib import pyplot as plt
-from matplotlib import patches as mpatches
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib import dates
+from dateutil import parser
 
 import csv
-import time
 import random
 
 
@@ -13,7 +13,7 @@ def plot_and_reset():
 
     colors = {}
 
-    # read the data
+    # read the data into a dictionary
     with open('log.csv', 'r') as file:
         reader = csv.reader(file)
         next(reader)
@@ -48,19 +48,27 @@ def plot_and_reset():
 
     timestamps = sorted(logs.keys())
 
-    # todo: clear the log
+    # write charts
+    write_pdf("temps.pdf", "Temperatures", "Temperature", "temp", names, timestamps, colors, logs)
+    write_pdf("valves.pdf", "Valves", "Valve %", "valve", names, timestamps, colors, logs)
 
-    # write valve chart
-    with PdfPages('valves.pdf') as pdf:
+    # clean the csv
+    with open('log.csv', 'w') as file:
+        file.write("time,apartment,thermostat,valve,temp\n")
+        file.close()
+
+
+def write_pdf(filename, titlestart, ylabel, dict_key, names, timestamps, colors, logs):
+    with PdfPages(filename) as pdf:
         for id in names.keys():
             fig = plt.figure()
             ax = fig.add_subplot(111)
-            plt.title("Valves from " + timestamps[0] + " to " + timestamps[-1])
-            ax.set_ylabel('Valve position')
-            ax.grid(which='major', linestyle='-')
-            ax.grid(which='minor', linestyle=':')
+            plt.title(titlestart + " from " + timestamps[0] + " to " + timestamps[-1])
+            ax.set_ylabel(ylabel)
+            ax.grid(which='major', linestyle=':')
 
-            legend = []
+            ax.xaxis.set_major_locator(dates.HourLocator())
+            ax.xaxis.set_major_formatter(dates.DateFormatter('%H:%M'))
 
             for name in names[id]:
                 color = colors[name]
@@ -69,14 +77,16 @@ def plot_and_reset():
                 y = []
                 for t in timestamps:
                     if name in logs[t]:
-                        x.append(t)
-                        y.append(float(logs[t][name]["valve"]))
+                        value = logs[t][name][dict_key]
+                        if value is not None and value != 'None':
+                            x.append(parser.parse(t))
+                            y.append(float(value))
+                        # if value was not recorded, skip the datapoint
                     # if name is not in the dict, skip this datapoint
 
-                ax.plot(x, y, '-', color=color)
-                legend.append(mpatches.Patch(color=color, label=name))
+                ax.plot(x, y, '-', color=color, label=name)
 
-            fig.legend(handles=legend)
+            ax.legend(loc='best')
             plt.xticks(rotation=90)
             plt.tight_layout()
             plt.draw()
@@ -84,10 +94,10 @@ def plot_and_reset():
 
 
 def randomised_color(color=None):
-    base = 0.1
+    base = 0.05
 
     def rd():
-        return random.uniform(0.2, 0.9)
+        return random.uniform(0.1, 0.8)
 
     if color == "r":
         return (rd(), base, base, 0.8)
