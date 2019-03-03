@@ -49,8 +49,8 @@ def plot(today):
     timestamps = sorted(logs.keys())
 
     # write charts
-    write_pdf("temps-" + today + ".pdf", "Temperatures", "Temperature", "temp", names, timestamps, colors, logs)
-    write_pdf("valves-" + today + ".pdf", "Valves", "Valve %", "valve", names, timestamps, colors, logs)
+    write_pdf("temps.pdf", "Temperatures", "Temperature", "temp", names, timestamps, colors, logs)
+    write_pdf("valves.pdf", "Valves", "Valve %", "valve", names, timestamps, colors, logs)
 
 
 def write_pdf(filename, titlestart, ylabel, dict_key, names, timestamps, colors, logs):
