@@ -7,14 +7,14 @@ import csv
 import random
 
 
-def plot_and_reset():
+def plot(today):
     names = {}
     logs = {}
 
     colors = {}
 
     # read the data into a dictionary
-    with open('log.csv', 'r') as file:
+    with open(today + "-log.csv", 'r') as file:
         reader = csv.reader(file)
         next(reader)
         for row in reader:
@@ -42,20 +42,15 @@ def plot_and_reset():
                 names[apartment].add(thermostat)
 
             if thermostat not in colors:
-                colors[thermostat] = randomised_color()
+                colors[thermostat] = color(thermostat)
 
         file.close()
 
     timestamps = sorted(logs.keys())
 
     # write charts
-    write_pdf("temps.pdf", "Temperatures", "Temperature", "temp", names, timestamps, colors, logs)
-    write_pdf("valves.pdf", "Valves", "Valve %", "valve", names, timestamps, colors, logs)
-
-    # clean the csv
-    with open('log.csv', 'w') as file:
-        file.write("time,apartment,thermostat,valve,temp\n")
-        file.close()
+    write_pdf("temps-" + today + ".pdf", "Temperatures", "Temperature", "temp", names, timestamps, colors, logs)
+    write_pdf("valves-" + today + ".pdf", "Valves", "Valve %", "valve", names, timestamps, colors, logs)
 
 
 def write_pdf(filename, titlestart, ylabel, dict_key, names, timestamps, colors, logs):
@@ -91,6 +86,53 @@ def write_pdf(filename, titlestart, ylabel, dict_key, names, timestamps, colors,
             plt.tight_layout()
             plt.draw()
             pdf.savefig(fig)
+
+def color(name):
+    r = (0.9, 0,   0,   0.8)
+    g = (0,   0.9, 0,   0.8)
+    b = (0,   0,   0.9, 0.8)
+    c = (0,   0.9, 0.9, 0.8)
+    m = (0.9, 0,   0.9, 0.8)
+    y = (0.9, 0.9, 0,   0.8)
+    o = (0.5, 0.5, 0,   0.8)
+    p = (0.5, 0,   0.5, 0.8)
+
+    # predefined colors
+    if name == "8_Spalnica":
+        return r
+    elif name == "8_Dnevna soba":
+        return g
+    elif name == "8_Vetrolov":
+        return b
+
+    elif name == "10_Kuhinja":
+        return y
+    elif name == "10_Dnevna1":
+        return g
+    elif name == "10_Spalnica":
+        return r
+    elif name == "10_Soba":
+        return m
+    elif name == "10_Kopalnica":
+        return o
+    elif name == "10_Savna":
+        return p
+    elif name == "10_Dnevna2":
+        return c
+    elif name == "10_Vetrolov":
+        return b
+
+    elif name == "11_Dnevna soba":
+        return g
+    elif name == "11_Kuhinja":
+        return y
+    elif name == "11_Kopalnica":
+        return r
+    elif name == "11_Vetrolov":
+        return b
+
+    # otherwise, generate randombly
+    return randomised_color()
 
 
 def randomised_color(color=None):
