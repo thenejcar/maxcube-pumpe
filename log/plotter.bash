@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#cd /opt/maxcube-pumpe/log/
+cd /opt/maxcube-pumpe/log/
 
 TODAY=$(date '+%Y-%m-%d')
 REMOTE_LOCATION=miza:dump/maxcube
